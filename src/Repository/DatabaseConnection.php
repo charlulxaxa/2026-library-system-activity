@@ -9,6 +9,9 @@ use App\Config\EnvParser;
 use RuntimeException;
 
 
+$env = new EnvParser();
+$env->load(__DIR__ . '/../../.env');
+
 class DatabaseConnection{
 
     private \PDO $conn;
