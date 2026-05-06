@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 
-namespace App\Library;
+namespace App\Repository;
 
 require_once __DIR__ . '../vendor/autoload.php';
 
@@ -10,7 +10,7 @@ require_once __DIR__ . '../vendor/autoload.php';
 use App\Repository\DatabaseConnection;
 use DateTime;
 use DateInterval;
-use App\Library\Book;
+use App\Entity\Book;
 
 
 class BookRepositories{
@@ -42,40 +42,42 @@ class BookRepositories{
         }
     }
 
-    public function getBook(int $book_id): Book {
-        $book = new Book();
+    public function getBook(int $book_id): ?Book {
         $sql = "SELECT * FROM Books Where book_id = :book_id";
         $statement = $this->pdo->prepare($sql);
         $statement->execute([':book_id' => $book_id]);
-        $result =  $statement->fetch();
+        $result =  $statement->fetch(\PDO::FETCH_ASSOC);
         if($result){
-            $book->setTitle($result['title']);
-            $book->setAuthor($result['author']);
-            $book->setYear($result['year']);
-            $book->setGenre($result['genre']);
+            $book = new Book(
+                $result['title'],
+                $result['author'],
+                $result['year'],
+                $result['genre']
+            );
         }
-        return $book;
+        return $book ?? null;
     }
     
     public function listBook(): array {
         $sql = 'SELECT * FROM Books';
         $statement = $this->pdo->prepare($sql);
         $statement->execute();
-        return $statement->fetchAll();
+        return $statement->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     public function searchBooks(string $keyword): array {
         $sql = "SELECT * FROM books WHERE title LIKE :keyword  OR author LIKE :keyword  ";
         $statement = $this->pdo->prepare($sql);
         $statement->execute([':keyword' => '%' . $keyword . '%']);
-        $result = $statement->fetchAll();
+        $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
         $books = [];
         foreach ($result as $row) {
-            $book = new Book();
-            $book->setTitle($row['title']);
-            $book->setAuthor($row['author']);
-            $book->setYear($row['year']);
-            $book->setGenre($row['genre']);
+            $book = new Book(
+                $row['title'],
+                $row['author'],
+                $row['year'],
+                $row['genre']
+            );
 
             $books[] = $book;
          }
