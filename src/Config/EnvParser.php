@@ -6,6 +6,9 @@ declare(strict_types=1);
 namespace App\Config;
 
 
+use App\Exceptions\DatabaseException;
+
+
 class EnvParser{
     private $variables = [];
     
@@ -17,7 +20,7 @@ class EnvParser{
      */
     public function load($path){
         if (!file_exists($path)) {
-            throw new \Exception(".env file not found at: " . $path);
+            throw new DatabaseException(".env file not found at: " . $path);
         }
         
         $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);

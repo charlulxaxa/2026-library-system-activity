@@ -40,10 +40,10 @@ if(isset($_POST['addBook']) && $_SERVER['REQUEST_METHOD'] === 'POST'){
         $sanitizedBook = Sanitizer::sanitizeArray($bookData);
 
         $book = new Book(
-        $sanitizedBook['title'],
-        $sanitizedBook['author'],
-        $sanitizedBook['year'],
-        $sanitizedBook['genre']
+            $sanitizedBook['title'],
+            $sanitizedBook['author'],
+            $sanitizedBook['year'],
+            $sanitizedBook['genre']
         );
 
         $result = $bookrepo->addBook($book);
@@ -106,7 +106,7 @@ if(isset($_SESSION['message'])){
     }
 </style>
 <body>
-    <div class="container w-50">
+    <div class="container border p-5 mt-3 rounded w-50">
         <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']) ?>" method="POST">
             <h3 class="headers">Add Book</h3>
             <?php if ($message): ?>

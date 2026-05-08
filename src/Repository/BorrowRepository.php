@@ -23,21 +23,64 @@ class BorrowRepository{
     }
 
     public function borrowBook(int $studentId, int $bookId, int $days): bool {
-        $due = date('Y-m-d', strtotime('+' . $days . ' days'));
+        try{
+            $this->pdo->beginTransaction();
 
-        $sql = "INSERT INTO borrow_records
-            (student_id, book_id, borrow_date, due_date, status)
-            VALUES (:student_id, :book_id, :borrow_date, :due_date, :status)";
+            $sql = "SELECT student_id FROM students WHERE student_id = :student_id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':student_id' => $studentId]);
 
-        $statement = $this->pdo->prepare($sql);
+            if (!$stmt->fetch()) {
+                throw new DatabaseException("Student does not exist");
+            }
+            
+            $check = $this->pdo->prepare("SELECT book_id FROM books WHERE book_id = :book_id");
+            $check->execute([':book_id' => $bookId]);
 
-        return $statement->execute([
-            ':student_id' => $studentId,
-            ':book_id' => $bookId,
-            ':borrow_date' => date('Y-m-d'),
-            ':due_date' => $due,
-            ':status' => LibraryConfig::STATUS_BORROWED
-        ]);
+            if (!$check->fetch()) {
+                throw new DatabaseException("Book does not exist");
+            }
+
+            $sql = "SELECT * FROM borrow_records
+            WHERE book_id = :book_id
+            AND status = :status";
+
+            $statement = $this->pdo->prepare($sql);
+                $statement->execute([
+                ':book_id' => $bookId,
+                ':status' => LibraryConfig::STATUS_BORROWED
+            ]);
+
+            $existing = $statement->fetch(\PDO::FETCH_ASSOC);
+
+            if ($existing) {
+                throw new DatabaseException("Book is already borrowed");
+            }
+
+            $due = date('Y-m-d', strtotime('+' . $days . ' days'));
+
+            $sql = "INSERT INTO borrow_records
+                (student_id, book_id, borrow_date, due_date, status)
+                VALUES (:student_id, :book_id, :borrow_date, :due_date, :status)";
+
+            $statement = $this->pdo->prepare($sql);
+
+            $statement->execute([
+                ':student_id' => $studentId,
+                ':book_id' => $bookId,
+                ':borrow_date' => date('Y-m-d'),
+                ':due_date' => $due,
+                ':status' => LibraryConfig::STATUS_BORROWED
+            ]);
+
+            $this->pdo->commit();
+
+            return true;
+        }
+        catch (DatabaseException $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
     }
 
     public function returnBook(int $recordId): ?float {
@@ -50,8 +93,7 @@ class BorrowRepository{
             $result = $statement->fetch(\PDO::FETCH_ASSOC);
             
             if (!$result) {
-                $this->pdo->rollBack();
-                return null;
+                throw new DatabaseException("Failed to return book", 0);
             }
             $fine = LibraryService::calculateOverdueFine($result['due_date'],LibraryConfig::DAILY_FINE_RATE);
             
@@ -70,7 +112,6 @@ class BorrowRepository{
         }
         catch (DatabaseException $e) {
             $this->pdo->rollBack();
-            error_log("Update error: " . $e->getMessage());
             throw new DatabaseException("Failed to return book", 0, $e);
         }
     }
