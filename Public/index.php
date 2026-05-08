@@ -8,7 +8,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use App\Config\DatabaseConfig;
 use App\Repository\BookRepository;
 use App\Entity\Book;
-use App\Exception\ValidationException;
+use App\Exceptions\ValidationException;
 use App\Service\Sanitizer;
 
 $db = DatabaseConfig::getInstance();
@@ -30,6 +30,10 @@ if (isset($_POST['BorrowForm']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
 if(isset($_POST['addBook']) && $_SERVER['REQUEST_METHOD'] === 'POST'){
     try{
+        if(empty($_POST['book_title']) || empty($_POST['book_author']) || empty($_POST['book_genre']) || empty($_POST['book_year'])){
+            throw new ValidationException("All fields are required");
+        }
+        
         $bookData = [
             'title' => $_POST['book_title'],
             'author' => $_POST['book_author'],
@@ -56,8 +60,8 @@ if(isset($_POST['addBook']) && $_SERVER['REQUEST_METHOD'] === 'POST'){
             $_SESSION['message'] = 'Failed to add a book';
             $_SESSION['messageType'] = 'error';
         }
-    }catch(ValidationException){
-        $_SESSION['message'] = 'Failed to add a book';
+    }catch(ValidationException $e){
+        $_SESSION['message'] = $e->getMessage();
         $_SESSION['messageType'] = 'error';
     }
 
@@ -104,6 +108,7 @@ if(isset($_SESSION['message'])){
         background-color: #f8d7da;
         color: #721c24;
     }
+    .row{width: 100%;margin:0;}
 </style>
 <body>
     <div class="container border p-5 mt-3 rounded w-50">

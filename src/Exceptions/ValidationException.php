@@ -1,13 +1,15 @@
 <?php
 declare(strict_types=1);
-namespace App\Exception;
+
+
+namespace App\Exceptions;
+
 
 use InvalidArgumentException;
 use Throwable;
 use Override;
 
-class ValidationException extends InvalidArgumentException
-{
+class ValidationException extends InvalidArgumentException{
     #[Override]
     public function __construct(string $message = "", int $code = 0, Throwable|null $previous = null)
     {

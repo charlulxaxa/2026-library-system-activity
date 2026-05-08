@@ -59,11 +59,31 @@ if(isset($_SESSION['message'])){
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </head>
+<style>
+    .headers{
+        text-align: center;
+        margin-top: 20px;
+    }
+    .message{
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 5px;
+    }
+    .message.success{
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .message.error{
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    .row{width: 100%;margin:0;}
+    </style>
 <body>
     <button class="btn btn-secondary mt-3 ms-3"><a href="../../Public/index.php" class="text-decoration-none text-white">Home</a></button>
     <div class="container w-25 mt-5 border p-4 rounded">
         <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']) ?>" method="POST" class="row">
-            <h3 class="headers">Borrow Book</h3>
+            <h3 class="headers p-0">Borrow Book</h3>
             <?php if($message): ?>
                 <div class="message <?php echo $messageType; ?>">
                     <?php echo $message; ?>
