@@ -4,22 +4,20 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-require_once __DIR__ . '../vendor/autoload.php';
 
-
-use App\Repository\DatabaseConnection;
+use App\Config\DatabaseConfig;
 use DateTime;
 use DateInterval;
 use App\Entity\Book;
+use App\Exceptions\DatabaseException;
 
+class BookRepository{
 
-class BookRepositories{
-
-    private DatabaseConnection $connection;
+    private DatabaseConfig $connection;
     private \PDO $pdo;
 
     public function __construct(){
-        $this->connection = DatabaseConnection::getInstance();
+        $this->connection = DatabaseConfig::getInstance();
         $this->pdo = $this->connection->getConnection();
     }
 
@@ -36,9 +34,9 @@ class BookRepositories{
             );
             return (int) $this->pdo->lastInsertId();
 
-        }catch (\PDOException $e){
+        }catch (DatabaseException $e){
             error_log("Query failed: " . $e->getMessage());
-            return null;
+            throw new DatabaseException("Failed to add book", 0, $e);
         }
     }
 
@@ -58,14 +56,14 @@ class BookRepositories{
         return $book ?? null;
     }
     
-    public function listBook(): array {
+    public function listBook(): ?array {
         $sql = 'SELECT * FROM Books';
         $statement = $this->pdo->prepare($sql);
         $statement->execute();
         return $statement->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    public function searchBooks(string $keyword): array {
+    public function searchBooks(string $keyword): ?array {
         $sql = "SELECT * FROM books WHERE title LIKE :keyword  OR author LIKE :keyword  ";
         $statement = $this->pdo->prepare($sql);
         $statement->execute([':keyword' => '%' . $keyword . '%']);

@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Entity;
 
+
 class Book{
     private string $title;
     private string $author;

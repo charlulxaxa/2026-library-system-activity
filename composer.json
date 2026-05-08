@@ -1,7 +1,7 @@
 {
-    "name": "charl/2026-library-system-activity",
+    "name": "student/2026-library-system-activity",
     "description": "Library System",
-    "type": "library",
+    "type": "project",
     "autoload": {
         "psr-4": {
             "App\\": "src/"

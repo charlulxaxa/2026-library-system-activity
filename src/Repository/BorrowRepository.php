@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+
 use App\Config\LibraryConfig;
 use DateTime;
 use DateInterval;
-use App\Repository\DatabaseConnection;
+use App\Config\DatabaseConfig;
 use App\Service\LibraryService;
+use App\Exceptions\DatabaseException;
 
 
 class BorrowRepository{
-    private DatabaseConnection $connection;
+    private DatabaseConfig $connection;
     private \PDO $pdo;
 
     public function __construct(){
-        $this->connection = DatabaseConnection::getInstance();
+        $this->connection = DatabaseConfig::getInstance();
         $this->pdo = $this->connection->getConnection();
     }
 
@@ -44,11 +46,16 @@ class BorrowRepository{
 
             $sql = "SELECT * FROM borrow_records WHERE record_id= :record_id";
             $statement = $this->pdo->prepare($sql);
-            $result = $statement->fetch();
+            $statement->execute([':record_id' => $recordId]);
+            $result = $statement->fetch(\PDO::FETCH_ASSOC);
             
+            if (!$result) {
+                $this->pdo->rollBack();
+                return null;
+            }
             $fine = LibraryService::calculateOverdueFine($result['due_date'],LibraryConfig::DAILY_FINE_RATE);
             
-            $sql2 = "UPDATE borrow_records SET return_date = :return_date , fine_mount = :fine , status = :status WHERE record_id = :record_id";
+            $sql2 = "UPDATE borrow_records SET return_date = :return_date , fine_mount = :fine_amount , status = :status WHERE record_id = :record_id  AND status != 'returned'";
             $statement2 = $this->pdo->prepare($sql2);
             $statement2->execute([
                 ':return_date' => date('Y-m-d'),
@@ -61,11 +68,10 @@ class BorrowRepository{
 
             return $fine;
         }
-        catch (\PDOException $e) {
+        catch (DatabaseException $e) {
             $this->pdo->rollBack();
             error_log("Update error: " . $e->getMessage());
-            
-            return null;
+            throw new DatabaseException("Failed to return book", 0, $e);
         }
     }
 }
