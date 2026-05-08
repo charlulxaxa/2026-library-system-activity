@@ -9,16 +9,37 @@ use App\Config\LibraryConfig;
 use App\Config\DatabaseConfig;
 use App\Exceptions\DatabaseException;
 
+
+/**
+ * Generates summary reports for the library system.
+ *
+ * This service aggregates data such as total books,
+ * borrowed books, returned books, and total fines.
+ *
+ * @author Charlo Marco
+ * @since 2026-05-08
+ */
 class LibraryReport{
 
     private DatabaseConfig $connection;
     private \PDO $pdo;
 
+    /**
+     * LibraryReport constructor
+     *
+     * Initializes the report service with a database connection.
+     *
+     */
     public function __construct(){
         $this->connection = DatabaseConfig::getInstance();
         $this->pdo = $this->connection->getConnection();
     }
 
+    /**
+     * Generates a summary report for the library system.
+     *
+     * @return array|null The generated report data or null if an error occurs
+     */
     public function generateReport(): ?array {
         try{
             $this->pdo->beginTransaction();
