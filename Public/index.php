@@ -18,24 +18,50 @@ const LOCATION = 'Location: ../src/View/';
 $message = '';
 $messageType = '';
 
-
+/**
+ * Redirects to Book List page
+ */
 if (isset($_POST['BookList']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
     header(LOCATION . 'Book_list.php');
     exit();
 }
+
+/**
+ * Redirects to Borrow Form page
+ */
 if (isset($_POST['BorrowForm']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
     header(LOCATION. 'Borrow_Form.php');
     exit();
 }
+
+/**
+ * Redirects to Report View page
+ */
 if (isset($_POST['ViewReport']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
     header(LOCATION. 'Report_View.php');
     exit();
 }
+
+/**
+ * Handles book creation request
+ * - Validates input fields
+ * - Sanitizes input data
+ * - Creates Book entity
+ * - Saves to database via repository
+ */
 if(isset($_POST['addBook']) && $_SERVER['REQUEST_METHOD'] === 'POST'){
     try{
+
+        /**
+         * Validate required fields
+         */
         if(empty($_POST['book_title']) || empty($_POST['book_author']) || empty($_POST['book_genre']) || empty($_POST['book_year'])){
             throw new ValidationException("All fields are required");
         }
+
+        /**
+         * Validate year format and range
+         */
         if(!is_numeric($_POST['book_year']) || (int)$_POST['book_year'] <= 0){
             throw new ValidationException("Year must be a positive integer");
         }
@@ -43,6 +69,9 @@ if(isset($_POST['addBook']) && $_SERVER['REQUEST_METHOD'] === 'POST'){
             throw new ValidationException("Year must be a valid year");
         }
 
+        /**
+         * Prepare raw book data
+         */
         $bookData = [
             'title' => $_POST['book_title'],
             'author' => $_POST['book_author'],
@@ -50,8 +79,14 @@ if(isset($_POST['addBook']) && $_SERVER['REQUEST_METHOD'] === 'POST'){
             'year' => (int)$_POST['book_year'],
         ];
 
+        /**
+         * Sanitize user input to prevent XSS and malformed data
+         */
         $sanitizedBook = Sanitizer::sanitizeArray($bookData);
 
+         /**
+         * Create Book entity object
+         */
         $book = new Book(
             $sanitizedBook['title'],
             $sanitizedBook['author'],
@@ -59,9 +94,14 @@ if(isset($_POST['addBook']) && $_SERVER['REQUEST_METHOD'] === 'POST'){
             $sanitizedBook['genre']
         );
 
+        /**
+        * Save book to database using repository
+        */
         $result = $bookrepo->addBook($book);
 
-
+        /**
+         * Set message based on result
+         */
         if(isset($result)){
             $_SESSION['message'] = 'Add book Success';
             $_SESSION['messageType'] = 'success';
@@ -80,7 +120,9 @@ if(isset($_POST['addBook']) && $_SERVER['REQUEST_METHOD'] === 'POST'){
     exit();
 }
 
-
+/**
+ * Display message from session (if exists)
+ */
 if(isset($_SESSION['message'])){
     $message = $_SESSION['message'];
     $messageType = $_SESSION['messageType'];

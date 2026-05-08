@@ -4,7 +4,13 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-
+/**
+ * Represents a student in the library system.
+ *
+ * Stores basic student information used for borrowing records
+ * and tracking library transactions.
+ *
+ */
 class Student{
     private int $studentId;
     private string $studentName;

@@ -6,7 +6,15 @@ use App\Repository\BookRepository;
 use App\Config\DatabaseConfig;
 use App\Exceptions\DatabaseException;
 
-
+/**
+ * Displays the list of books from the library system.
+ *
+ * This script retrieves all books from the BookRepository and renders
+ * them in an HTML table format for the user interface.
+ *
+ * @author Charlo Marco
+ * @since 2026-05-08
+ */
 $database = DatabaseConfig::getInstance();
 $bookRepo = new BookRepository();
 
@@ -32,7 +40,7 @@ try {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </head>
 <body>
-    <button class="btn btn-secondary mt-3 ms-3"><a href="../../Public/index.php" class="text-decoration-none text-white">Home</a></button>
+    
     <h3 class="BookList-header">Book List</h3>
     
     <table class="table bookList">

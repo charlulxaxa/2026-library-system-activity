@@ -8,21 +8,57 @@ namespace App\Config;
 use App\Config\EnvParser;
 use App\Exceptions\DatabaseException;
 
-
+/**
+ * DatabaseConfig
+ *
+ * Singleton class responsible for managing database connection using PDO.
+ * Loads configuration from environment variables and establishes a secure connection.
+ */
 $env = new EnvParser();
 $env->load(__DIR__ . '/../../.env');
 
+/**
+ * Class DatabaseConfig
+ *
+ * Handles database connection, configuration loading, and transaction control.
+ * Implements Singleton pattern to ensure only one PDO connection exists.
+ * @author Charlo Marco
+ * @since 2026-05-08
+ */
 class DatabaseConfig{
 
+    /**
+     * PDO connection instance
+     */
     private \PDO $conn;
+
+    /**
+     * Database configuration array loaded from environment variables
+     *
+     * @var array<string, string|null>
+     */
     private array $config;
+
+    /**
+     * Singleton instance
+     */
     private static ?DatabaseConfig $instance = null;
 
+    /**
+     * DatabaseConfig constructor
+     *
+     * Loads configuration and establishes database connection.
+     *
+     * @throws DatabaseException if required configuration is missing or connection fails
+     */
     public function __construct(){
         $this->loadConfig();
         $this->connect();
     }
 
+    /**
+     * Prevent cloning of singleton instance
+     */
     private function __clone() {
         //Prevents Cloning
     }
@@ -31,6 +67,22 @@ class DatabaseConfig{
         throw new DatabaseException("Cannot unserialize singleton");
     }
 
+    /**
+     * Load database configuration from environment variables
+     *
+     * Required variables:
+     * - DB_HOST
+     * - DB_PORT
+     * - DB_NAME
+     * - DB_USER
+     * - DB_PASSWORD
+     *
+     * Optional:
+     * - DB_CHARSET (default: utf8mb4)
+     * - DB_DRIVER (default: mysql)
+     *
+     * @throws DatabaseException if required variables are missing
+     */
     private function loadConfig(){
         $this->config = [
             'host' => getenv('DB_HOST') ?: 'localhost',
@@ -47,6 +99,11 @@ class DatabaseConfig{
         }
     }
 
+    /**
+     * Establish PDO database connection
+     *
+     * @throws DatabaseException if connection fails
+     */
     private function connect(){
         try {
             $dsn = sprintf(
@@ -74,6 +131,11 @@ class DatabaseConfig{
         }
     }
     
+    /**
+     * Get singleton instance of DatabaseConfig
+     *
+     * @return DatabaseConfig
+     */
     public static function getInstance(): DatabaseConfig {
         if (self::$instance === null) {
             self::$instance = new self();
@@ -81,22 +143,47 @@ class DatabaseConfig{
         return self::$instance;
     }
     
+     /**
+     * Get PDO connection instance
+     *
+     * @return \PDO
+     */
     public function getConnection(): \PDO {
         return $this->conn;
     }
     
+    /**
+     * Get last inserted ID from database
+     *
+     * @return string
+     */
     public function lastInsertId(): string {
         return $this->conn->lastInsertId();
     }
     
+    /**
+     * Begin database transaction
+     *
+     * @return bool
+     */
     public function beginTransaction(): bool {
         return $this->conn->beginTransaction();
     }
     
+    /**
+     * Commit current transaction
+     *
+     * @return bool
+     */
     public function commit(): bool {
         return $this->conn->commit();
     }
-    
+
+    /**
+     * Rollback current transaction
+     *
+     * @return bool
+     */
     public function rollBack(): bool {
         return $this->conn->rollBack();
     }
