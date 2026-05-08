@@ -4,6 +4,15 @@ declare(strict_types=1);
 
 namespace App\Config;
 
+/**
+ * LibraryConfig
+ *
+ * Contains system-wide constants used in the Library Management System.
+ * This class centralizes configuration values to ensure consistency
+ * and avoid magic numbers/strings across the application.
+ * @author Charlo Marco
+ * @since 2026-05-08
+ */
 
 class LibraryConfig{
 

@@ -7,10 +7,26 @@ namespace App\Entity;
 
 use DateTime;
 
+/**
+ * Represents a borrowing transaction in the library system.
+ *
+ * Stores data about the book borrowed, student involved,
+ * borrowing period, status, and any incurred fines.
+ *
+* @author Charlo Marco
+ * @since 2026-05-08
+ */
+
 class BorrowRecord {
 
     private string $status;
     private int $studentId;
+    
+    /**
+     * Fine amount applied for overdue returns.
+     *
+     * @var float
+     */
     private float $fineAmount;
     private DateTime $dueDate;
     private DateTime $borrowDate;
