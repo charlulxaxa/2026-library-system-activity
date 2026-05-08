@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Config\LibraryConfig;
-use App\Repository\DatabaseConnection;
+use App\Config\DatabaseConfig;
 
 
 class LibraryReport{
 
-    private DatabaseConnection $connection;
+    private DatabaseConfig $connection;
     private \PDO $pdo;
 
     public function __construct(){
-        $this->connection = DatabaseConnection::getInstance();
+        $this->connection = DatabaseConfig::getInstance();
         $this->pdo = $this->connection->getConnection();
     }
 
@@ -42,6 +42,7 @@ class LibraryReport{
         }catch (\PDOException $e){
             $this->pdo->rollBack();
             error_log("Query failed: " . $e->getMessage());
+            
             return null;
         }
     }

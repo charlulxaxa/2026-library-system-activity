@@ -2,21 +2,21 @@
 declare(strict_types=1);
 
 
-namespace App\Repository;
+namespace App\Config;
 
 
 use App\Config\EnvParser;
-use RuntimeException;
+use App\Exceptions\DatabaseException;
 
 
 $env = new EnvParser();
 $env->load(__DIR__ . '/../../.env');
 
-class DatabaseConnection{
+class DatabaseConfig{
 
     private \PDO $conn;
     private array $config;
-    private static ?DatabaseConnection $instance = null;
+    private static ?DatabaseConfig $instance = null;
 
     public function __construct(){
         $this->loadConfig();
@@ -28,7 +28,7 @@ class DatabaseConnection{
     }
     
     public function __wakeup() {
-        throw new RuntimeException("Cannot unserialize singleton");
+        throw new DatabaseException("Cannot unserialize singleton");
     }
 
     private function loadConfig(){
@@ -43,7 +43,7 @@ class DatabaseConnection{
         ];
         
         if (!$this->config['name'] || !$this->config['user']) {
-            throw new \RuntimeException("Database name and user are required in .env file");
+            throw new DatabaseException("Database name and user are required in .env file");
         }
     }
 
@@ -70,11 +70,11 @@ class DatabaseConnection{
             );
             
         } catch (\PDOException $e) {
-            throw new \RuntimeException("Database connection failed: " . $e->getMessage(),0 , $e);
+            throw new DatabaseException("Database connection failed: " . $e->getMessage(), 0, $e);
         }
     }
     
-    public static function getInstance(): DatabaseConnection {
+    public static function getInstance(): DatabaseConfig {
         if (self::$instance === null) {
             self::$instance = new self();
         }
