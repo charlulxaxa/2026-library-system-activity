@@ -9,7 +9,7 @@ use App\Config\DatabaseConfig;
 use App\Repository\BookRepository;
 use App\Entity\Book;
 use App\Exception\ValidationException;
-
+use App\Service\Sanitizer;
 
 $db = DatabaseConfig::getInstance();
 $bookrepo = new BookRepository();
@@ -37,11 +37,13 @@ if(isset($_POST['addBook']) && $_SERVER['REQUEST_METHOD'] === 'POST'){
             'year' => (int)$_POST['book_year'],
         ];
 
+        $sanitizedBook = Sanitizer::sanitizeArray($bookData);
+
         $book = new Book(
-        $bookData['title'],
-        $bookData['author'],
-        $bookData['year'],
-        $bookData['genre']
+        $sanitizedBook['title'],
+        $sanitizedBook['author'],
+        $sanitizedBook['year'],
+        $sanitizedBook['genre']
         );
 
         $result = $bookrepo->addBook($book);
@@ -84,9 +86,27 @@ if(isset($_SESSION['message'])){
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
 </head>
-
+<style>
+    .headers{
+        text-align: center;
+        margin-top: 20px;
+    }
+    .message{
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 5px;
+    }
+    .message.success{
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .message.error{
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+</style>
 <body>
-    <div class="container">
+    <div class="container w-50">
         <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']) ?>" method="POST">
             <h3 class="headers">Add Book</h3>
             <?php if ($message): ?>
