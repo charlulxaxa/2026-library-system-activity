@@ -7,16 +7,16 @@ namespace App\Repository;
 use App\Config\LibraryConfig;
 use DateTime;
 use DateInterval;
-use App\Repository\DatabaseConnection;
+use App\Config\DatabaseConfig;
 use App\Service\LibraryService;
 
 
 class BorrowRepository{
-    private DatabaseConnection $connection;
+    private DatabaseConfig $connection;
     private \PDO $pdo;
 
     public function __construct(){
-        $this->connection = DatabaseConnection::getInstance();
+        $this->connection = DatabaseConfig::getInstance();
         $this->pdo = $this->connection->getConnection();
     }
 

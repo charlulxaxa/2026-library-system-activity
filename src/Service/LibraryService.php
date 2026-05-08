@@ -9,7 +9,7 @@ use DateInterval;
 
 class LibraryService{
     
-    public function calculateOverdueFine(DateTime $dueDate, float $dailyRate): float{
+    public static function calculateOverdueFine(DateTime $dueDate, float $dailyRate): float{
         $today = new DateTime();
         $diff = $today->diff($dueDate);
         $daysOverdue = (int) $diff->format('%r%a');
