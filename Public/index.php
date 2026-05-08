@@ -27,13 +27,22 @@ if (isset($_POST['BorrowForm']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
     header(LOCATION. 'Borrow_Form.php');
     exit();
 }
-
+if (isset($_POST['ViewReport']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    header(LOCATION. 'Report_View.php');
+    exit();
+}
 if(isset($_POST['addBook']) && $_SERVER['REQUEST_METHOD'] === 'POST'){
     try{
         if(empty($_POST['book_title']) || empty($_POST['book_author']) || empty($_POST['book_genre']) || empty($_POST['book_year'])){
             throw new ValidationException("All fields are required");
         }
-        
+        if(!is_numeric($_POST['book_year']) || (int)$_POST['book_year'] <= 0){
+            throw new ValidationException("Year must be a positive integer");
+        }
+        if($_POST['book_year'] > (int)date("Y") || $_POST['book_year'] < 1000){
+            throw new ValidationException("Year must be a valid year");
+        }
+
         $bookData = [
             'title' => $_POST['book_title'],
             'author' => $_POST['book_author'],
@@ -147,6 +156,7 @@ if(isset($_SESSION['message'])){
         <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']) ?>" method="POST">
             <button class="btn btn-primary mt-3" type="submit" name="BookList">View Book List</button>
             <button class="btn btn-primary mt-3" type="submit" name="BorrowForm">Borrow Book</button>
+            <button class="btn btn-primary mt-3" type="submit" name="ViewReport">View Report</button>
         </form>
 </body>
 

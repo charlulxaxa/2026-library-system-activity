@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+
 use App\Config\LibraryConfig;
 use App\Config\DatabaseConfig;
-
+use App\Exceptions\DatabaseException;
 
 class LibraryReport{
 
@@ -24,26 +25,28 @@ class LibraryReport{
             $report = [];
             
             $statement = $this->pdo->prepare("SELECT COUNT(*) as c FROM books");
-            $report['total_books'] = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            $statement->execute();
+            $report['total_books'] = $statement->fetchColumn();
 
             $statement2 = $this->pdo->prepare("SELECT COUNT(*) as c FROM borrow_records WHERE status = :status");
-            $report['total_borrowed'] = $statement2->execute([':status' => LibraryConfig::STATUS_BORROWED]);
+            $statement2->execute([':status' => LibraryConfig::STATUS_BORROWED]);
+            $report['total_borrowed'] = $statement2->fetchAll(\PDO::FETCH_ASSOC);
 
             $statement3 = $this->pdo->prepare("SELECT COUNT(*) as c FROM borrow_records WHERE status = :status");
-            $report['total_returned'] = $statement3->execute([':status' => LibraryConfig::STATUS_RETURNED]);
-            
+            $statement3->execute([':status' => LibraryConfig::STATUS_RETURNED]);
+            $report['total_returned'] = $statement3->fetchAll(\PDO::FETCH_ASSOC);
+
             $statement4 = $this->pdo->prepare("SELECT SUM(fine_amount) as s FROM borrow_records WHERE fine_amount > 0");
-            $report['total_fines'] = $statement4->execute([]);
-            
+            $statement4->execute();
+            $report['total_fines'] = $statement4->fetchAll(\PDO::FETCH_ASSOC);
+
             $this->pdo->commit();
 
             return $report;
 
         }catch (\PDOException $e){
             $this->pdo->rollBack();
-            error_log("Query failed: " . $e->getMessage());
-            
-            return null;
+            throw new DatabaseException("Query failed: " . $e->getMessage());
         }
     }
 }
