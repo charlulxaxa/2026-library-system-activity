@@ -13,6 +13,7 @@ namespace App\Config;
  * @author Charlo Marco
  * @since 2026-05-08
  */
+
 class LibraryConfig{
 
     public const STATUS_RETURNED = 'returned';
